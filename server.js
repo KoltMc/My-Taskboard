@@ -14,18 +14,18 @@ let con = mysql.createConnection({
 con.connect(function(err) {
     if (err) throw err;
     console.log("Connected!");
-    con.query("DROP DATABASE taskboardusers", function (err, result) {
-        if (err) throw err;
-        console.log("Database dropped.");
-    })
 })
+
+// Authentication
+const bcrypt = require('bcrypt');
+const bodyParser = require('body-parser');
 
 // Server 
 const http = require('http');
 
 http.createServer((req, res) => {
 
-    // Log incoming requests
+    // Log incoming requests to command line
     console.log(req.method, req.url);
 
     if (req.url === "/") {
@@ -49,6 +49,7 @@ http.createServer((req, res) => {
         });
     }
 
+    // Save button
     else if (req.url === "/save" && req.method === "POST") {
         fs.writeFile("letter.txt", "Y", err => {
             if (err) {
@@ -60,6 +61,18 @@ http.createServer((req, res) => {
             res.writeHead(200);
             res.end("Saved");
         });
+    }
+
+    // Authentication
+    else if (req.url === '/register' && req.method === "POST") {
+        // Register if data fits criteria and user is unique
+        // try {
+        //     const { username, password } = req.body;            
+        // }
+    }
+
+    else if (req.url === '/login' && req.method === "POST") {
+        // Try login w/ mysql
     }
 
     else {
