@@ -3,5 +3,5 @@ USE taskboardusers;
 
 CREATE TABLE IF NOT EXISTS user (
     username VARCHAR(20) PRIMARY KEY,
-    password VARCHAR(30)
+    password VARCHAR(255)
 );
