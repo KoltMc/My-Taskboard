@@ -31,11 +31,13 @@ http.createServer((req, res) => {
     console.log(req.method, req.url);
 
     // Parse request body
-    jsonParser(req, res, (err) => {
+    jsonParser(req, res, async (err) => {
         if (err) {
             res.statusCode = 400;
             return res.end('Invalid JSON');
         }
+
+        console.log(req.body);
 
         if (req.url === "/") {
             fs.readFile("./index.html", (err, data) => {
@@ -78,40 +80,28 @@ http.createServer((req, res) => {
             try {
                 const { username, password } = req.body;
 
-                // Check if username exists
-                let isAvailable = false;
-                con.query(
-                    "SELECT username FROM user WHERE username = ?", 
-                    [username], 
-                    (err, result) => { 
-                        if (err) throw err;
-                        console.log(result);
-                        if (result.length === 0) {
-                            isAvailable = true;
-                        } else {
-                            // Username exists -- do nothing
-                        }
-                    }
+                const [rows] = await con.promise().query(
+                    "SELECT username FROM user WHERE username = ?",
+                    [username]
                 );
 
-                if (isAvailable) {
-                    bcrypt.hash(password, 10, (err, hashedPassword) => {
-                        if (err) throw err;
-
-                        con.query(
-                            "INSERT INTO user (username, password) VALUES (?, ?)", 
-                            [username, hashedPassword], 
-                            (err, result) => { 
-                                if (err) throw err;
-                                console.log("1 record inserted");
-                            }
-                        );
-                    });
+                if (rows.length > 0) {
+                    // username taken
+                    return;
                 }
-
+                
+                const hashedPassword = await bcrypt.hash(password, 10);
+                
+                await con.promise().query(
+                    "INSERT INTO user (username, password) VALUES (?, ?)",
+                    [username, hashedPassword]
+                );
             }
             catch (error) {
-                res.statusCode(500).json({ message: 'Error registering user'});
+                console.error("REGISTER ERROR:", error);
+                res.statusCode = 500;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ message: 'Error registering user' }));
             }
         }
 
