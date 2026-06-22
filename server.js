@@ -96,8 +96,10 @@ http.createServer((req, res) => {
                     "INSERT INTO user (username, password) VALUES (?, ?)",
                     [username, hashedPassword]
                 );
-            }
-            catch (error) {
+
+                console.log("Registration successful.");
+
+            } catch (error) {
                 console.error("REGISTER ERROR:", error);
                 res.statusCode = 500;
                 res.setHeader('Content-Type', 'application/json');
@@ -107,30 +109,35 @@ http.createServer((req, res) => {
 
         else if (req.url === '/login' && req.method === "POST") {
             // Try login w/ mysql
-            const {username, password} = req.body;
+            try {
+                const {username, password} = req.body;
 
-            con.query(
-                "SELECT username, password FROM user WHERE username = ?", 
-                [username], 
-                async (err, result) => { 
-                    if (err) throw err;
-                    console.log(result);
-                    if (result.length === 0) {
-                        // user not found
-                        return res.statusCode(401).json({ message: 'Invalid Credentials' });
+                const [rows] = await con.promise().query(
+                    "SELECT username, password FROM user WHERE username = ?", 
+                    [username]
+                );
+
+                if(rows.length > 0) {
+                    const passwordMatch = await bcrypt.compare(password, rows[0].password);
+
+                    if (!passwordMatch) {
+                        res.statusCode = 401;
+                        res.setHeader('Content-Type', 'application/json');
+                        res.end(JSON.stringify({ message: 'Invalid Credentials' }));
                     } else {
-                        const passwordMatch = await bcrypt.compare(password, result.password);
-
-                        if (!passwordMatch) {
-                            return res.statusCode(401).json({ message: 'Invalid Credentials' });
-                        }
-
-                        res.json({ 
-                            message: 'Login successful',
-                        })
+                        res.end(JSON.stringify({ message: 'Login Successful.' }));
+                        console.log("Login successful.")
                     }
+
+                    
                 }
-            );
+
+            } catch (error) {
+                console.error("LOGIN ERROR:", error);
+                res.statusCode = 500;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ message: 'Error logging in' }));
+            }
         }
 
         else {
