@@ -95,14 +95,18 @@ http.createServer((req, res) => {
                 );
 
                 if (isAvailable) {
-                    con.query(
-                        "INSERT INTO user (username, password) VALUES (?, ?)", 
-                        [username, bcrypt.hash(password, 10)], 
-                        (err, result) => { 
-                            if (err) throw err;
-                            console.log("1 record inserted");
-                        }
-                    );
+                    bcrypt.hash(password, 10, (err, hashedPassword) => {
+                        if (err) throw err;
+
+                        con.query(
+                            "INSERT INTO user (username, password) VALUES (?, ?)", 
+                            [username, hashedPassword], 
+                            (err, result) => { 
+                                if (err) throw err;
+                                console.log("1 record inserted");
+                            }
+                        );
+                    });
                 }
 
             }
@@ -113,6 +117,30 @@ http.createServer((req, res) => {
 
         else if (req.url === '/login' && req.method === "POST") {
             // Try login w/ mysql
+            const {username, password} = req.body;
+
+            con.query(
+                "SELECT username, password FROM user WHERE username = ?", 
+                [username], 
+                async (err, result) => { 
+                    if (err) throw err;
+                    console.log(result);
+                    if (result.length === 0) {
+                        // user not found
+                        return res.statusCode(401).json({ message: 'Invalid Credentials' });
+                    } else {
+                        const passwordMatch = await bcrypt.compare(password, result.password);
+
+                        if (!passwordMatch) {
+                            return res.statusCode(401).json({ message: 'Invalid Credentials' });
+                        }
+
+                        res.json({ 
+                            message: 'Login successful',
+                        })
+                    }
+                }
+            );
         }
 
         else {
