@@ -45,6 +45,13 @@ http.createServer((req, res) => {
             res.end(data);
             });
         }
+
+        else if (req.url === "/taskboard" && req.method === "GET") {
+            fs.readFile("./taskboard.html", (err, data) => {
+                res.writeHead(200, {"Content-Type": "text/html"});
+                res.end(data);
+            })
+        }
         
         else if (req.url === "/styles.css") {
             fs.readFile("./styles.css", (err, data) => {
@@ -125,7 +132,10 @@ http.createServer((req, res) => {
                         res.setHeader('Content-Type', 'application/json');
                         res.end(JSON.stringify({ message: 'Invalid Credentials' }));
                     } else {
-                        res.end(JSON.stringify({ message: 'Login Successful.' }));
+                        res.writeHead(302, {
+                            Location: "/taskboard"
+                        });
+                        res.end();
                         console.log("Login successful.")
                     }
 
