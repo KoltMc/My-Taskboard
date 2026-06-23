@@ -47,4 +47,8 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
             password
         })
     });
+
+    if (response.ok) {
+        window.location.href = '/taskboard';
+    }
 })
