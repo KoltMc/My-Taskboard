@@ -19,8 +19,11 @@ con.connect(function(err) {
 // Authentication
 const bcrypt = require('bcrypt');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
 
 const jsonParser = bodyParser.json();
+
+const JWT_SECRET = 'mysecretkey';
 
 // Server 
 const http = require('http');
@@ -39,6 +42,40 @@ http.createServer((req, res) => {
 
         console.log(req.body);
 
+        const authenticateJWT = (req, res, next) => {
+            const cookies = req.headers.cookie;
+
+            if (!cookies) {
+                res.statusCode = 401;
+                res.setHeader('Content-Type', 'application/json');
+                return res.end(JSON.stringify({ message: 'Authorization header missing.' }));
+            }
+
+            const tokenCookie = cookies
+                .split(';')
+                .find(cookie => cookie.trim().startsWith('token='));
+
+            if (!tokenCookie) {
+                res.statusCode = 401;
+                res.setHeader('Content-Type', 'application/json');
+                return res.end(JSON.stringify({ message: 'Token missing.' }));
+            }
+
+            const token = tokenCookie.split('=')[1];
+
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+
+                req.user = decoded;
+
+                next();
+            } catch(error) {
+                res.statusCode = 403;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ message: 'Invalid or expired token.' }));
+            }
+        }
+
         if (req.url === "/") {
             fs.readFile("./index.html", (err, data) => {
             res.writeHead(200, {"Content-Type": "text/html"});
@@ -47,9 +84,11 @@ http.createServer((req, res) => {
         }
 
         else if (req.url === "/taskboard" && req.method === "GET") {
-            fs.readFile("./taskboard.html", (err, data) => {
+            authenticateJWT(req, res, () => {
+                fs.readFile("./taskboard.html", (err, data) => {
                 res.writeHead(200, {"Content-Type": "text/html"});
                 res.end(data);
+                })
             })
         }
         
@@ -132,10 +171,16 @@ http.createServer((req, res) => {
                         res.setHeader('Content-Type', 'application/json');
                         res.end(JSON.stringify({ message: 'Invalid Credentials' }));
                     } else {
+                        const jwtPayload = { username };
+                        const token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: '1hr' });
+                        res.setHeader(
+                            'Set-Cookie',
+                            `token=${token}; HttpOnly; Path=/`
+                        );
                         res.writeHead(302, {
                             Location: "/taskboard"
                         });
-                        res.end();
+                        res.end(JSON.stringify({ message: 'Login successful.', token }));
                         console.log("Login successful.")
                     }
 
