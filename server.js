@@ -91,6 +91,17 @@ http.createServer((req, res) => {
                 })
             })
         }
+
+        else if (req.url === "/images/HTA.PNG" && req.method === "GET") {
+            fs.readFile("./images/HTA.PNG", (err, data) => {
+                if (err) {
+                    res.writeHead(404);
+                    return res.end();
+                }
+                res.writeHead(200, {"Content-Type": "image/png"});
+                res.end(data);
+            });
+        }
         
         else if (req.url === "/styles.css") {
             fs.readFile("./styles.css", (err, data) => {
