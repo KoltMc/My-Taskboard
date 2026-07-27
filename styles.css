@@ -20,4 +20,13 @@ body {
     text-align: center;
     border-style: solid;
     border-radius: 5px;
+    background-color: #FFFFFF;
+}
+
+#mydivheader {
+    padding: 10px;
+    cursor: move;
+    z-index: 10;
+    background-color: #2196F3;
+    color: #fff;
 }
