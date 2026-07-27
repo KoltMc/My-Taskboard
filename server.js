@@ -117,6 +117,13 @@ http.createServer((req, res) => {
             });
         }
 
+        else if (req.url === "/tbscript.js") {
+            fs.readFile("./tbscript.js", (err, data) => {
+                res.writeHead(200, {"Content-Type": "application/javascript"});
+                res.end(data);
+            });
+        }
+
         // Save button
         else if (req.url === "/save" && req.method === "POST") {
             fs.writeFile("letter.txt", "Y", err => {
