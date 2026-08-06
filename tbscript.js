@@ -1,5 +1,14 @@
 dragElement(document.getElementById("test"));
 
+const box = document.createElement("div");
+box.style.position = "absolute";
+box.style.top = 100 + "px";
+box.style.bottom = 120 + "px";
+box.style.backgroundColor = "FFFFFF";
+box.innerText = "Hello there.";
+document.body.appendChild(box);
+dragElement(box);
+
 function dragElement(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     if(document.getElementById(elmnt.id + "header")) {
