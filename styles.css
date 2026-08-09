@@ -13,6 +13,23 @@ body {
     margin-bottom: 10px;
 }
 
+.task2 {
+    position: absolute;
+    top: 120px;
+    left: 140px;
+    text-align: center;
+    border-style: solid;
+    border-radius: 5px;
+    background-color: #FFFFFF;
+}
+
+.taskgroup {
+    width: 49%;
+    display: inline-block;
+    text-align: center;
+    border-style: solid;
+}
+
 #test {
     position: absolute;
     top: 80px;
