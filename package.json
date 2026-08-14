@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.23.3"
+  },
+  "name": "newby-taskboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KoltMc/Newby-Taskboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KoltMc/Newby-Taskboard/issues"
+  },
+  "homepage": "https://github.com/KoltMc/Newby-Taskboard#readme",
+  "devDependencies": {}
+}
